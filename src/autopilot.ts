@@ -49,13 +49,12 @@ export function status() {
 }
 
 /**
- * Whether this server's live grant is the owner's approval of the strategy in force. `authorize` refuses
- * every autopilot send without it; checked first so that such a tick waits for the owner instead of
- * recording refusals.
+ * Read live authority separately from strategy approval: an absent grant cannot quote; a live
+ * grant for another strategy can still plan for owner review. Dispatch rechecks every send.
  */
 async function mandateApproved(strategy: Strategy) {
   const grant = liveGrant(await api.listGrants(agentId()), process.env.AGENT_GRANT_TOKEN);
-  return grant !== undefined && grantApproves(grant.label, strategy);
+  return { grant, approved: grant !== undefined && grantApproves(grant.label, strategy) };
 }
 
 let running = false;
@@ -140,8 +139,12 @@ async function run(found: Found, progress: (event: ProgressEvent) => void): Prom
     }
 
     // Every send, a sweep's shield included, needs the owner's grant for the strategy in force.
-    const approved = await mandateApproved(strategy);
+    const { grant, approved } = await mandateApproved(strategy);
     if (strategyChanged()) return changed();
+    if (!grant) {
+      found.refusal = "grant_missing";
+      return done("Refused: no live grant is held for this agent; the owner's grant doesn't approve this strategy. Issue a new grant from Policy.");
+    }
     if (!approved) report.push("sweep left for the owner: the owner's grant doesn't approve this strategy");
     else {
       progress({ type: "STEP_STARTED", stepName: "sweep" });

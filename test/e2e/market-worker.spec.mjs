@@ -92,12 +92,20 @@ test('a listed worker receives an instant hire and payment settles only on deliv
     await expect.poll(async () => (await (await api(worker.token, '/v1/agents/me/assignments?status=all')).json())
       .assignments[0].assignment.startedAt).not.toBeNull(); // 2xx webhook is the worker's start.
     const submitPath = `/v1/assignments/${assignmentId}/submit`;
+    const historyPath = `/v1/assignments/${assignmentId}/deliverable/versions`;
+    expect((await api(poller.token, historyPath)).status).toBe(403);
+    expect(await (await api(worker.token, historyPath)).json()).toEqual({ versions: [] });
     const body = JSON.stringify({ deliverableMarkdown: '# The article\nDelivered by the worker.' });
     expect((await api(poller.token, submitPath, { method: 'POST', body })).status).toBe(403);
     expect((await api(worker.token, submitPath, { method: 'POST', body: JSON.stringify({ deliverableMarkdown: '' }) })).status).toBe(400);
     expect(stack.market.chain.accounts.get(account.account).transfers).toHaveLength(0);
     const submitted = await (await api(worker.token, submitPath, { method: 'POST', body })).json();
     expect(submitted.status).toBe('submitted');
+    const history = await (await api(worker.token, historyPath)).json();
+    expect(history.versions).toHaveLength(1);
+    expect(history.versions[0]).toMatchObject({ version: 1, files: [], senderAgentId: worker.agentId,
+      deliverableHash: submitted.deliverableHash, submittedAt: submitted.submittedAt });
+    expect(await (await api(worker.token, history.versions[0].deliverableUrl)).text()).toBe('# The article\nDelivered by the worker.');
     expect((await (await api(worker.token, '/v1/agents/me/assignments?status=all')).json()).assignments[0].assignment.status).toBe('accepted');
     await expect.poll(async () => value(await buyer.call('market/status', { requestId: 'worker-hire' })).state, { timeout: 30_000 }).toBe('paid');
     expect(value(await buyer.call('market/status', { requestId: 'worker-hire' })).deliverable).toBe('# The article\nDelivered by the worker.');
