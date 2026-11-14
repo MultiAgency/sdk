@@ -50,7 +50,10 @@ described above.
 **0.6.0 deployed by the owner, 2026-11-14 UTC.** The owner stopped deployment `2fd7d108`, took volume backup
 `dea15ac8` of the stopped volume (16:31Z), and uploaded release candidate `c1a3ae61`'s `platform` package (source
 `f4729f4`) as deployment `c5c6e6bd-91c0-408b-9976-41e396e4f990`, image
-`sha256:32d36dfc015f93442db564b2d6aa58ffe760f93c8109df339023bc1987ab7847`; it reached `SUCCESS` at 16:33Z. Read-only
+`sha256:6122c5a1bd5771561394f2db94eaaaebd780ad0b345a5da7f68af653876979ef` (Railway's `meta.imageDigest` for the
+deployment, read 2026-11-14 ~17:05Z; `sha256:32d36dfc…`, recorded earlier, is the `containerimage.digest` the build log
+printed before the push, not the deployed image); it
+reached `SUCCESS` at 16:33Z. Read-only
 verification: x64, all 257 packaged runtime file hashes match the candidate's manifest, the operator configuration
 `/data/operator-config/platform-staging-no-market.json` is unchanged (app setup Treasury and Payables; Market setup
 disabled) and the state directory is retained; all 8 hosted agents started. Hosted agents kept their settings, the
