@@ -1,5 +1,5 @@
 # Build only from scripts/package-platform.mjs output, never the working repository.
-FROM node:24.22.0-slim
+FROM node:26.13.1-slim
 WORKDIR /app
 RUN corepack enable
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
