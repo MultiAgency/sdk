@@ -2,7 +2,7 @@
 
 Observed 2026-11-13 UTC. This record separates consumer compatibility from live feature activation.
 
-The requested final release is [0.6.0](release-0.6.0.md). Issue #74 remains a release gate.
+[0.6.0](release-0.6.0.md) was published 2026-11-14 UTC and #74 closed the same day; the record below is as of 2026-11-13.
 The owner deferred #81's provider dependency on 2026-11-13; keep its safe halt and explicit
 consumer limitation, without claiming successful original-key recovery.
 
@@ -34,7 +34,7 @@ release identity and acceptance by both consumers before changing those pins.
 
 | Item | Disposition | Evidence needed to complete |
 | --- | --- | --- |
-| [Platform #74](https://github.com/MultiAgency/platform/issues/74) | Keep open; live Market activation remains gated | Exact route qualification, authority/external-writer review, legacy recovery and migration/rollback evidence |
+| [Platform #74](https://github.com/MultiAgency/platform/issues/74) | Closed 2026-11-14 for the existing staging funding-only scope; live Market activation remains gated | A hire, new Market accounts or use of reserved funds needs its own evidence and owner action |
 | [Platform #81](https://github.com/MultiAgency/platform/issues/81) | Keep open; preserve unresolved original requests and block replacement sends | Authoritative original-request/key-to-operation binding and a lost-response recovery test without duplicate submission |
 | [Provider SDK #38](https://github.com/NEAR-Intents-Agent-API/sdk-typescript/issues/38) | Canonical inquiry; #37 closed as a duplicate, per the [release requirements](release-0.6.0.md) | Provider-supported read-only lookup, retention and negative-result semantics |
 | Staging/main divergence | Release preparation remains necessary | Separate and review local changes, preserve incoming-credit support, and publish an exact tested source identity |

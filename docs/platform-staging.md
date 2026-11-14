@@ -47,6 +47,16 @@ file hashes to the manifest, and the owner's platform smoke passed 18 of 18 chec
 they exercised no money action or new application behavior. Configuration apply was a later, separate owner action
 described above.
 
+**0.6.0 deployed by the owner, 2026-11-14 UTC.** The owner stopped deployment `2fd7d108`, took volume backup
+`dea15ac8` of the stopped volume (16:31Z), and uploaded release candidate `c1a3ae61`'s `platform` package (source
+`f4729f4`) as deployment `c5c6e6bd-91c0-408b-9976-41e396e4f990`, image
+`sha256:32d36dfc015f93442db564b2d6aa58ffe760f93c8109df339023bc1987ab7847`; it reached `SUCCESS` at 16:33Z. Read-only
+verification: x64, all 257 packaged runtime file hashes match the candidate's manifest, the operator configuration
+`/data/operator-config/platform-staging-no-market.json` is unchanged (app setup Treasury and Payables; Market setup
+disabled) and the state directory is retained; all 8 hosted agents started. Hosted agents kept their settings, the
+Market agent's execution included (the owner's choice). Platform smoke passed every check. These establish package
+identity and public host behavior, not app acceptance or any money action.
+
 Steps 1–2 record initial provisioning. For an existing staging service, retain the original service, volume, variables
 and hosted records; do not create an empty replacement or repeat setup to recover an outage. Follow the preservation
 and owner-action review in [operations](operations.md#railway-infrastructure-as-code) before restarting executors.

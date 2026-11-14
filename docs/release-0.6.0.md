@@ -1,8 +1,12 @@
 # Platform and SDK 0.6.0 release requirements
 
-Requested 2026-11-13. This is a release target, not a published version or completion claim.
-[Market qualification #74](https://github.com/MultiAgency/platform/issues/74) remains a release
-requirement. On 2026-11-13 the owner deferred the provider dependency for
+Requested 2026-11-13. **Published 2026-11-14 UTC** from release candidate `c1a3ae61` on source `f4729f4` (tree
+identical to main `1a14a7d`, #95; tag `sdk-v0.6.0`). Every candidate gate passed under Node 24.22.3; the npm tarball
+equals the candidate's (SHA-256 `aa3d4325…`), the same bytes Treasury and Paperwork vendor. Staging runs its platform
+package since 2026-11-14 ([platform staging](platform-staging.md)); production does not.
+[Market qualification #74](https://github.com/MultiAgency/platform/issues/74) closed 2026-11-14 for its stated scope,
+the existing staging funding-only route; Market setup stays disabled and no hire is claimed. Paperwork accepted the pair
+(demo#14); Treasury's acceptance on a merged commit is pending. On 2026-11-13 the owner deferred the provider dependency for
 [lost-response recovery #81](https://github.com/MultiAgency/platform/issues/81): keep the issue open,
 retain unknown requests and block replay. Successful original-key recovery is not claimed by 0.6.0.
 
