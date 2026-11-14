@@ -238,6 +238,23 @@ export async function market({ agents = {}, payee = {}, height = 1_000_000n, web
       const mine = [...assignments.values()].filter(item => item.handle === handle && (status === 'all' || item.assignment.status === status));
       return json(res, 200, { assignments: mine.slice(offset, offset + limit).map(({ assignment, job }) => ({ assignment, job, latestMessage: null })) });
     }
+    // Market OpenAPI 2.0.0, verified 2026-11-14: worker aat_ admission also covers managed
+    // history and raw reads. This fixture models worker tokens only, not account-session access.
+    const deliverableRoute = /^\/v1\/assignments\/([^/]+)\/deliverable\/(versions|raw|versions\/([1-9][0-9]*)\/raw)$/.exec(url.pathname);
+    if (req.method === 'GET' && deliverableRoute) {
+      const handle = workerAuth(req, res);
+      if (!handle) return;
+      const item = assignments.get(deliverableRoute[1]);
+      if (!item) return json(res, 404, { error: 'assignment_not_found' });
+      if (item.handle !== handle) return json(res, 403, { error: 'agent_token_scope_forbidden' });
+      const versions = item.versions ?? [];
+      if (deliverableRoute[2] === 'versions') return json(res, 200, { versions: versions.map(({ view }) => view) });
+      const version = deliverableRoute[2] === 'raw' ? versions.at(-1)
+        : versions.find(({ view }) => String(view.version) === deliverableRoute[3]);
+      if (!version) return json(res, 404, { error: 'deliverable_not_found' });
+      res.writeHead(200, { 'content-type': 'text/markdown; charset=utf-8' });
+      return res.end(version.markdown);
+    }
     const assignmentRoute = /^\/v1\/assignments\/([^/]+)\/(start|submit)$/.exec(url.pathname);
     if (req.method === 'POST' && assignmentRoute) {
       const handle = workerAuth(req, res);
@@ -257,8 +274,16 @@ export async function market({ agents = {}, payee = {}, height = 1_000_000n, web
         return json(res, 400, { error: 'invalid_deliverable' });
       if (item.assignment.status !== 'in_progress') return json(res, 409, { error: 'assignment_not_in_progress' });
       const now = new Date().toISOString();
+      const versions = item.versions ??= [];
+      const version = versions.length + 1;
+      const deliverableHash = createHash('sha256').update(markdown).digest('hex');
+      const deliverableUrl = `/v1/assignments/${assignmentRoute[1]}/deliverable/versions/${version}/raw`;
+      // Capture a new immutable snapshot before settlement. Later assignment changes cannot
+      // rewrite prior bytes; reading after a lost acknowledgement never submits or relays again.
+      versions.push({ markdown, view: Object.freeze({ version, files: [], submittedAt: now,
+        deliverableHash, deliverableUrl, senderAgentId: listings.get(handle).agentId }) });
       Object.assign(item.assignment, { status: 'submitted', submittedAt: now, updatedAt: now,
-        deliverableHash: createHash('sha256').update(markdown).digest('hex') });
+        deliverableHash, deliverableUrl });
       // The response shows the submission. X402 accepts immediately on delivery, but only after the delegate
       // actually transfers; an expired or unusable delegate must never make the simulated buyer look paid.
       const submitted = { ...item.assignment };

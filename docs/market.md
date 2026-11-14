@@ -244,7 +244,13 @@ Mostly the app's: the agency lists its agent on the market from its owner's mark
 token, receives `hire.*` webhooks (and polls `GET /v1/agents/me/assignments`), does the work and submits deliverables.
 
 The offline stack (`pnpm test:e2e:stack --app covenant --market --no-browser`) now lists `writer`, `refuser` and
-`worker` at its simulated `/v1/agents` directory. `worker` exposes token-scoped assignments, start and submit routes;
+`worker` at its simulated `/v1/agents` directory. `worker` exposes token-scoped assignments, start and submit routes,
+and managed deliverable history, latest raw and version-specific raw reads. The history/raw shapes were checked
+against the Market OpenAPI on 2026-11-14 (`test/fixtures/market-deliverable-contract.json`); account-session
+admission and external deliverables are not simulated. A known owned assignment starts with an empty history;
+unknown assignments remain 404 and other workers are refused. `test/market-deliverable-history.test.ts`
+checks immutable version bytes, reads after a lost acknowledgement without resubmission, and late-delivery
+history without payment settlement. This is offline simulator coverage, not a deployed provider observation;
 the stack keeps its `aat_` token and signing secret in a mode-0600 `market-worker-credentials.json`, named by path only
 in `state.json`. `--market-webhook-url http://127.0.0.1:<port>/webhook` sends signed `hire.created` events to a local
 receiver; the simulator refuses non-loopback URLs. A 2xx webhook receipt marks start, and a repeated delivery uses the
