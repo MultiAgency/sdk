@@ -3,7 +3,6 @@ import { test } from "node:test";
 import { AgentApiError } from "@near-intents-agent-api/sdk";
 import { displayedUsd, priceState, totalUsd } from "../src/valuation.js";
 import { paymentEvidence, refusalDetails } from "../src/provider-display.js";
-import { errorMessage, providerDetailText } from "../web/src/shared/provider-message.js";
 
 const now = Date.parse("2026-10-14T12:00:00Z");
 const fresh = { price: 2, priceUpdatedAt: "2026-10-14T11:59:00Z", priceExpiresAt: "2026-10-14T12:01:00Z", decimals: 6, public: "1000000", confidential: "2000000" };
@@ -33,15 +32,6 @@ test("provider metadata is bounded and allowlisted, never inferred from other er
   assert.deepEqual(refusalDetails(error("wallet_busy", { budget_remaining_usd: "1" })), {});
   assert.deepEqual(refusalDetails(new Error("budget_remaining_usd=1")), {});
   assert.deepEqual(refusalDetails(error("policy_change_throttled", { available_at: "tomorrow" })), {});
-});
-
-test("refusal copy preserves sub-cent values and gives no retry authorization", () => {
-  const details = { budgetRemainingUsd: "0.000001", availableAt: "2030-01-01T00:00:00Z" };
-  const text = errorMessage(Object.assign(new Error("Budget exceeded"), { data: details }));
-  assert.match(text, /0\.000001 USD/);
-  assert.match(text, /Check the current state/);
-  assert.doesNotMatch(text, /Try again|safe to|nothing moved/);
-  assert.match(providerDetailText({ budgetRemainingUsd: "0" }), /0 USD/);
 });
 
 test("malformed evidence and arbitrary provider fields are not forwarded", () => {

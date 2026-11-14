@@ -64,22 +64,22 @@ and [demo at 77cce32](https://github.com/NEAR-Intents-Agent-API/demo/blob/77cce3
 describe stripping `nearcom:` and lowercasing its account for Intents transfers. These are
 documentation/source observations, not evidence of a deployed provider version.
 
-Our dashboard normalizes owner-entered payees before policy matching and payment review; the RPC
-normalizes transfer destinations before preparation or dispatch. Signed policies and provider
+The RPC normalizes transfer destinations before preparation or dispatch; normalizing owner-entered
+payees before policy matching and payment review is the consuming app's. Signed policies and provider
 evidence are not rewritten. Equivalent recipient inputs reach the existing duplicate held-payout
 check. Expired and revoked grants remain visible as history; only live grants can authorize new
 actions. These changes are tested offline in `test/upstream-compat.test.ts`,
-`test/intents-account.test.ts`, `test/form-validation.test.ts` and
+`test/intents-account.test.ts` and
 the apps' `test/browser/upstream-compat.cjs`; they have not been verified on mainnet.
 
 **Provider display follow-up (offline-tested).** Upstream's
 [funds changes at demo@f888f7d](https://github.com/NEAR-Intents-Agent-API/demo/commit/f888f7d)
 retain price timestamps and snake-case transaction/refund fields; its
 [error changes at demo@7841c1e](https://github.com/NEAR-Intents-Agent-API/demo/commit/7841c1e)
-allowlist budget and availability metadata. Our dashboard now preserves balances when prices are
-missing, marks stale or unverified price freshness, and withholds the managed book's USD total and
-allocation when a held managed asset lacks a fresh price. Unmanaged holdings remain listed separately.
-Prices expire against the browser clock even if a refresh fails.
+allowlist budget and availability metadata. The platform's valuation (`src/valuation.ts`) reports a price as
+stale or unavailable, gives no USD value for a held asset without a fresh price, and gives no total when any
+value is missing (`test/provider-values.test.ts`); how balances, freshness and the managed book's total are
+shown is the consuming app's.
 The demo preflight also refuses an unavailable or invalid managed-book USD total instead of
 counting missing values as zero (`test/demo-check.test.ts`, offline fixtures).
 The execution holdings calculation now also requires fresh prices and finite managed valuations before
@@ -106,9 +106,9 @@ exact valuation, settlement-time prices or fees, or provider accounting. No depl
 
 RPC errors and immediate payment refusals carry only validated budget-remaining and availability
 metadata. Availability is an observation, not permission to retry; ambiguous outcomes remain unresolved.
-Supplementary refusal metadata is not persisted in the journal. Payment review shows provider-reported
-transaction hashes and refund fields, marks missing evidence explicitly, and does not infer an explorer
-URL, refund asset, or independent settlement proof. Refund amounts remain exact raw units. These changes
+Supplementary refusal metadata is not persisted in the journal. The payment evidence the platform returns
+carries only provider-reported transaction hashes and refund fields, leaves missing evidence empty, and infers
+no explorer URL, refund asset, or independent settlement proof; how a review screen presents it is the consuming app's. Refund amounts remain exact raw units. These changes
 are covered by `test/provider-display.test.ts`, `test/provider-values.test.ts`,
 `test/payment-status.test.ts` and the apps' `test/browser/provider-display.cjs`; deployed behavior is unverified.
 
@@ -444,10 +444,10 @@ not verified on the hosted deployment. The underlying provider dependencies abov
 
 Agreement terms are voter guidance, not an invoice-to-agreement binding. An owner offer is marked
 filed when any later invoice from that payee exists (`src/agreements.ts`); multiple offers can match
-the same invoice. Payment review shows the terms of the payee's newest non-declined agreement with terms
-(`termsInForce`, as the server's `termsFor`), which need not be the terms of that invoice; a payee's agreements all
-read `agreed` once the policy lists the payee. The offline test (`web/src/features/payables/payment-stages.test.ts`)
-covers selecting the newest terms, excluding declined agreements and other payees. It does not establish
+the same invoice. The server reports the terms of the payee's newest non-declined agreement with terms
+(`termsFor`), which need not be the terms of that invoice; a payee's agreements all
+read `agreed` once the policy lists the payee. `test/agreements.test.ts` covers returning a payee's terms and
+excluding a declined agreement; choosing the newest of several is not separately tested. It does not establish
 agreement-specific enforcement.
 
 Autopilot summaries distinguish swaps skipped for cost from a book with no rebalance legs meeting

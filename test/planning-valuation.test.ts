@@ -212,10 +212,10 @@ test("dispatch values and authorizes against one clock observation after provide
   prices = () => timedPrices(Object.entries(ASSETS).map(([symbol, asset_id]) => ({ symbol, asset_id, decimals: 0, price: 1 })), observedAt);
   await withMoneyLock(lock => dispatch(lock, "rebalance", { method: "swap", request: {
     origin_asset: input, destination_asset: output, amount: "5", min_amount_out: "5", confidential: true,
-  } }, { planned: { plan, leg: plan.actions[0]! }, autopilot: true, now: () => {
+  } }, { sending: { planned: { plan, leg: plan.actions[0]! }, autopilot: true, now: () => {
     clockReads++;
     return new Date(observedAt);
-  } }));
+  } } }));
   assert.equal(clockReads, 1);
   assert.deepEqual(sends, ["swap"]);
   assert.equal(readOps()[0]?.usdIn, 5, "journal valuation uses the authorization clock, not wall time");

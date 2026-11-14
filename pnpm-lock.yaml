@@ -169,18 +169,6 @@ importers:
       '@ag-ui/core':
         specifier: 1.0.3
         version: 1.0.3(zod@4.6.7)
-      '@fastnear/near-connect':
-        specifier: ^0.14.1
-        version: 0.14.1
-      '@fontsource-variable/geist':
-        specifier: ^5.3.0
-        version: 5.3.0
-      '@fontsource-variable/geist-mono':
-        specifier: ^5.3.0
-        version: 5.3.0
-      '@fontsource-variable/inter':
-        specifier: ^5.3.0
-        version: 5.3.0
       '@near-intents-agent-api/sdk':
         specifier: 0.8.2
         version: 0.8.2
@@ -193,39 +181,15 @@ importers:
       '@orpc/server':
         specifier: 2.0.0-beta.47
         version: 2.0.0-beta.47
-      '@phosphor-icons/react':
-        specifier: ^2.1.10
-        version: 2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@tanstack/react-query':
-        specifier: 5.105.0
-        version: 5.105.0(@types/react@19.3.0)(react@19.3.1)
-      class-variance-authority:
-        specifier: 0.7.1
-        version: 0.7.1
-      cn:
-        specifier: ^0.5.0
-        version: 0.5.0
       effect:
         specifier: 4.1.0
         version: 4.1.0
       near-kit:
         specifier: ^0.20.2
         version: 0.20.2
-      openai:
-        specifier: ^7.45.1
-        version: 7.45.1(undici@7.30.1)(zod@4.6.7)
       proper-lockfile:
         specifier: ^4.1.2
         version: 4.1.2
-      radix-ui:
-        specifier: 1.8.1
-        version: 1.8.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      react:
-        specifier: ^19.3.1
-        version: 19.3.1
-      react-dom:
-        specifier: ^19.3.1
-        version: 19.3.1(react@19.3.1)
       tsx:
         specifier: ^4.23.15
         version: 4.23.15
@@ -236,6 +200,18 @@ importers:
       '@babel/parser':
         specifier: ^8.0.10
         version: 8.0.10
+      '@fastnear/near-connect':
+        specifier: ^0.14.1
+        version: 0.14.1
+      '@fontsource-variable/geist':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource-variable/geist-mono':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource-variable/inter':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@playwright/test':
         specifier: 1.64.1
         version: 1.64.1
@@ -263,15 +239,33 @@ importers:
       '@types/react-dom':
         specifier: ^19.3.0
         version: 19.3.0(@types/react@19.3.0)
+      class-variance-authority:
+        specifier: 0.7.1
+        version: 0.7.1
+      cn:
+        specifier: ^0.5.0
+        version: 0.5.0
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
+      openai:
+        specifier: ^7.45.1
+        version: 7.45.1(undici@7.30.1)(zod@4.6.7)
       playwright:
         specifier: 1.64.1
         version: 1.64.1
+      radix-ui:
+        specifier: 1.8.1
+        version: 1.8.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       railway:
         specifier: 3.16.0
         version: 3.16.0
+      react:
+        specifier: ^19.3.1
+        version: 19.3.1
+      react-dom:
+        specifier: ^19.3.1
+        version: 19.3.1(react@19.3.1)
       shadcn:
         specifier: 4.23.0
         version: 4.23.0
@@ -823,13 +817,6 @@ packages:
 
   '@orpc/shared@2.0.0-beta.47':
     resolution: {integrity: sha512-m8SLQbZFgkj888haL8H8VFDNnc7PNOhx0hPCX2Uy/dAs8CBhO/Tkl9dJRoL7qPtv4lVh/2ZDd5MVHiT65Tj8fw==}
-
-  '@phosphor-icons/react@2.1.10':
-    resolution: {integrity: sha512-vt8Tvq8GLjheAZZYa+YG/pW7HDbov8El/MANW8pOAz4eGxrwhnbfrQZq0Cp4q8zBEu8NIhHdnr+r8thnfRSNYA==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      react: '>= 16.8'
-      react-dom: '>= 16.8'
 
   '@playwright/test@1.64.1':
     resolution: {integrity: sha512-IaYGml/nSOiZWROfPtuIL7neuu9qDOZ3TNvNljUIrhDMxiGTgPjzj/g9p9RxpS2tSepPDRY+UwAaEeiKtUvIAg==}
@@ -1789,18 +1776,6 @@ packages:
     resolution: {integrity: sha512-9Ta/GMGPcqBIqlbrqeYyqBVKEP7XyAXy6nn90bPiE2oHB6KPgjEweUbHNXLQ6Pim01VtMMNf0dmUFMGKKHXmlw==}
     engines: {node: '>=20.12.0'}
     hasBin: true
-
-  '@tanstack/query-core@5.105.0':
-    resolution: {integrity: sha512-7p56vRmT/z4UJ6sctGIdl5WRUQyUv53IUpUwEKi2g97zMbO7zh8ZsCLffGAvCPBR4xD72e3VXsDyLwXHhoNTMQ==}
-
-  '@tanstack/react-query@5.105.0':
-    resolution: {integrity: sha512-y+hMuDERvgg6ay1da0V1a6ZC0ZONt7dELxSFkqRZuwm7p1TTZs0MoXrPlBRflIpRoYjvzQVYxycnLImpFLhWrw==}
-    peerDependencies:
-      '@types/react': ^18 || ^19
-      react: ^18 || ^19
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
 
   '@ts-morph/common@0.27.0':
     resolution: {integrity: sha512-Wf29UqxWDpc+i61k3oIOzcUfQt79PIT9y/MWfAGlrkjg6lBC1hwDECLXPVJAhWjiGbfBCxZd65F/LIZF3+jeJQ==}
@@ -3509,11 +3484,6 @@ snapshots:
       radash: 12.1.1
       type-fest: 5.10.0
 
-  '@phosphor-icons/react@2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
-    dependencies:
-      react: 19.3.1
-      react-dom: 19.3.1(react@19.3.1)
-
   '@playwright/test@1.64.1':
     dependencies:
       playwright: 1.64.1
@@ -4515,15 +4485,6 @@ snapshots:
       tailwindcss: 4.3.3
 
   '@tanstack/intent@0.5.6': {}
-
-  '@tanstack/query-core@5.105.0': {}
-
-  '@tanstack/react-query@5.105.0(@types/react@19.3.0)(react@19.3.1)':
-    dependencies:
-      '@tanstack/query-core': 5.105.0
-      react: 19.3.1
-    optionalDependencies:
-      '@types/react': 19.3.0
 
   '@ts-morph/common@0.27.0':
     dependencies:

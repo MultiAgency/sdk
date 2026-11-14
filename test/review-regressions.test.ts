@@ -18,12 +18,3 @@ test("gateway approve-only survives an instance file requesting execution", () =
     assert.equal(result.stdout.trim(), "false\nfalse");
   } finally { rmSync(dir, {recursive:true,force:true}); }
 });
-
-const { paymentAssets } = await import(new URL("../web/src/features/payables/payment-assets.ts", import.meta.url).href);
-const { ASSETS } = await import("../src/policy.js");
-const book = [{ asset: ASSETS.USDC, symbol: "USDC", decimals: 6, public: "0", confidential: "0", usd: 0, price: 1 }];
-test("payout choices exclude unsupported assets even when wNEAR is first", () => {
-  const all = [{ ...book[0], asset: ASSETS.wNEAR, symbol: "wNEAR" }, ...book];
-  for (const label of ["payout", "invoices"]) assert.deepEqual(paymentAssets(all, label), book);
-  assert.deepEqual(paymentAssets(all, "treasury"), all);
-});

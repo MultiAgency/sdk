@@ -1,4 +1,3 @@
-import "../web/src/features/payables/payment-stages.test.js";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";

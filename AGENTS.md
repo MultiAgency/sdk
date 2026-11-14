@@ -52,12 +52,15 @@ Files: `src/agent.ts` (dispatch), `authorize.ts`, `lock.ts`, `ops.ts`, `plans.ts
 - Deploys, restarts and dashboard money actions are the user's. Prepare and verify; let them ship.
 - The retired owner dashboard frontend and its public entry are removed. `web` builds only the confirm/stop
   entry. Keep it independent of owner-session reads; consuming apps own their product UI.
+  On that page: a held payout is never shown as a completed payment and status text stays visible; review context
+  comes before the action in mobile document order; a required selection never clears on a repeated click; controls
+  keep a 44px minimum target.
 - `pnpm test:live` moves or touches real funds: run only when asked, never scheduled. `PLATFORM_URL=<host> pnpm smoke` is the read-only check of a host.
 - An unattended run or freeze may be in progress: ask the user before editing money-path files.
 
 ## Calibrated claims
 
-`evidence/inventory.ts` is the canonical requirement/evidence inventory. The app imports it;
+`evidence/inventory.ts` is the canonical requirement/evidence inventory.
 `pnpm evidence:write` generates the area tables and DEMO verification section. Do not hand-edit
 generated sections. Record dated observations in `docs/mainnet-log.md`, reference them in the
 inventory, then regenerate. README and walkthroughs link to the canonical presentations.

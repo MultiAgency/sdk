@@ -1,14 +1,7 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { documentationUpdates, replaceGenerated, requirementsMarkdown } from "../scripts/evidence-docs.js";
 import { PROTOTYPES, PROVEN, VERIFICATIONS, knownLabel, summarizeRequirements, type Requirement } from "../evidence/inventory.js";
-
-test("the app uses the canonical evidence inventory instead of a handwritten copy", () => {
-  const source = readFileSync(new URL("../web/src/features/evidence/beats.ts", import.meta.url), "utf8");
-  assert.ok(source.includes('export * from "../../../../evidence/inventory.js"'));
-  assert.doesNotMatch(source, /export const PROTOTYPES/);
-});
 
 test("coverage separates observation scope and never promotes missing scope or offline tests", () => {
   const requirement = (known: Requirement["known"], where?: Requirement["where"]): Requirement => ({

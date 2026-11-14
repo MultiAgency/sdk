@@ -80,7 +80,7 @@ async function place(proposal: OrderProposalRecord) {
   const lock = await acquireMoneyLock();
   try {
     return await dispatch(lock, "limit-order", { method: "limit_order", request: proposal.order },
-      undefined, undefined, undefined, undefined, undefined, undefined, { proposalId: proposal.id });
+      { order: { proposalId: proposal.id } });
   } finally { await lock.release(); }
 }
 
@@ -106,7 +106,7 @@ test("an owner-approved proposal places once under the money lock and saves orde
       /submission must pass through dispatch/);
     assert.deepEqual(readOps(), [], "direct send never prepares a journal entry");
     assert.equal((await dispatch(lock, "limit-order", { method: "limit_order", request: proposal.order },
-      undefined, undefined, undefined, undefined, undefined, undefined, { proposalId: proposal.id })).status, "SUCCESS");
+      { order: { proposalId: proposal.id } })).status, "SUCCESS");
   } finally { await lock.release(); }
 
   assert.equal(submissions, 1);

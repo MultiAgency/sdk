@@ -56,8 +56,8 @@ async function rejectReplay() {
   assert.throws(() => claimInvoiceSubmission(operation.idempotencyKey, operation.request), /replay is blocked/);
   const lock = await acquireMoneyLock();
   try {
-    await assert.rejects(dispatch(lock, "invoices", { method: "transfer", request }, undefined,
-      operation.idempotencyKey), /not prepared; replay is blocked/);
+    await assert.rejects(dispatch(lock, "invoices", { method: "transfer", request },
+      { preparedKey: operation.idempotencyKey }), /not prepared; replay is blocked/);
   } finally { await lock.release(); }
 }
 

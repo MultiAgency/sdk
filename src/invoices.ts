@@ -112,7 +112,7 @@ export const file = (invoice: InvoiceInput, authenticatedPayee: string, expected
     }
     await dispatch(lock, "invoices", { method: "transfer", request: {
       asset: ASSETS.USDC, amount: known.amount, recipient: known.payee, confidential: true,
-    } }, undefined, known.operation.idempotencyKey, expectedPolicy);
+    } }, { preparedKey: known.operation.idempotencyKey, expectedPolicy });
     return { id, status: paymentStatus(getInvoice(id)!) };
   } catch (error) {
     if (error instanceof MoneyLockBusy || error instanceof UnresolvedOperations) return { id, status: "busy" };

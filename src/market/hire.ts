@@ -121,8 +121,8 @@ const topUp = async (lock: MoneyLock, market: MarketSend, stage: MarketStage, ac
   context?: FundingContext) => {
   if (context) await assertFundingContext(context);
   return dispatch(lock, "market-topup", { method: "withdraw", request: { asset, amount, chain: "near", recipient: account, confidential: true } },
-    undefined, undefined, context?.reviewedPolicy, marketStageKey(market.bindingKey, stage), undefined,
-    { ...market, stage, ...(context && { reviewedGrant: context.reviewedGrant }) });
+    { expectedPolicy: context?.reviewedPolicy, requestKey: marketStageKey(market.bindingKey, stage),
+      market: { ...market, stage, ...(context && { reviewedGrant: context.reviewedGrant }) } });
 };
 
 /** A provider SUCCESS is not a chain receipt. A stage stays reserved until its exact credit is final. */
@@ -304,7 +304,7 @@ async function executeHire(actor: string | undefined, input: HireInput, approval
         asset: usdc, amount: quote.row!.amount, payer: signer.account, publicKey: signer.publicKey,
         nonce: (view.keyNonce! + 1n).toString(), maxBlockHeight: paymentExpiry(view.height, quote.terms).toString(),
         balanceAtSigning: view.balance.toString() };
-      return dispatch(lock, "market-hire", { method: "x402", request }, undefined, undefined, undefined, key, undefined, market);
+      return dispatch(lock, "market-hire", { method: "x402", request }, { requestKey: key, market });
     });
   } catch (error) {
     // A binding can outlive its approval or a provider read; its stage operation is never replaced under a new key.
