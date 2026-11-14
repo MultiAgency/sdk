@@ -263,8 +263,8 @@ for (const refusedStage of ["open", "usdc"] as const) test(`dispatch cannot cont
       asset: nextStage === "open" ? ASSETS.wNEAR : ASSETS.USDC,
       amount: nextStage === "open" ? OPEN_ACCOUNT_WNEAR : approved.amount,
       chain: "near", recipient: KEY, confidential: true,
-    } }, undefined, undefined, undefined, marketStageKey(bindingKey, nextStage), undefined,
-    { hire: approved, bindingKey, stage: nextStage }), /market_binding_closed/);
+    } }, { requestKey: marketStageKey(bindingKey, nextStage),
+      market: { hire: approved, bindingKey, stage: nextStage } }), /market_binding_closed/);
     // Even a fully funded key cannot pay the closed hire through a direct dispatch call.
     sim.fund(KEY, approved.amount);
     await assert.rejects(dispatch(lock, "market-hire", { method: "x402", request: {
@@ -273,7 +273,7 @@ for (const refusedStage of ["open", "usdc"] as const) test(`dispatch cannot cont
         payTo: approved.payTo, maxTimeoutSeconds: approved.maxTimeoutSeconds },
       asset: ASSETS.USDC, amount: approved.amount, payer: KEY, publicKey: parseKey(secretKey).publicKey.toString(),
       nonce: "1", maxBlockHeight: (sim.chain.height + 1_200n).toString(), balanceAtSigning: approved.amount,
-    } }, undefined, undefined, undefined, bindingKey, undefined, { hire: approved, bindingKey }), /market_binding_closed/);
+    } }, { requestKey: bindingKey, market: { hire: approved, bindingKey } }), /market_binding_closed/);
   } finally { await lock.release(); }
   assert.deepEqual(readOps(), before, "neither rejected dispatch prepares another operation");
   assert.equal(withdrawals.length, 0);
@@ -618,7 +618,7 @@ test("dispatch independently blocks an x402 action for a funding-only binding", 
         payTo: approved.payTo, maxTimeoutSeconds: approved.maxTimeoutSeconds },
       asset: ASSETS.USDC, amount: approved.amount, payer: KEY, publicKey: parseKey(secretKey).publicKey.toString(),
       nonce: "1", maxBlockHeight: (sim.chain.height + 1_200n).toString(), balanceAtSigning: approved.amount,
-    } }, undefined, undefined, undefined, bindingKey, undefined, { hire: approved, bindingKey }), /funding_only/);
+    } }, { requestKey: bindingKey, market: { hire: approved, bindingKey } }), /funding_only/);
   } finally { await lock.release(); }
   assert.equal(readOps().some(o => o.method === "x402"), false);
 });
@@ -844,8 +844,8 @@ test("dispatch cannot add native funding or exceed an allocation's signed USDC t
       await assert.rejects(dispatch(lock, "market-topup", { method: "withdraw", request: {
         asset: stage === "open" ? ASSETS.wNEAR : ASSETS.USDC, amount: stage === "open" ? "20000000000000000000000" : "490001",
         chain: "near", recipient: KEY, confidential: true,
-      } }, undefined, undefined, undefined, marketStageKey(key, stage), undefined,
-      { hire: target.approved, bindingKey: key, stage }), /exact bounded USDC top-up/);
+      } }, { requestKey: marketStageKey(key, stage),
+        market: { hire: target.approved, bindingKey: key, stage } }), /exact bounded USDC top-up/);
     }
   } finally { await lock.release(); }
   assert.equal(withdrawals.length, 2);

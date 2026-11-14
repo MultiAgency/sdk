@@ -64,8 +64,8 @@ export async function requestPayout(actor: string | undefined, input: { requestI
   if (recorded()) return answer(input.requestId, recorded());
   try {
     // A request recorded meanwhile can't be recorded again: the journal refuses a second preparation of one key.
-    await withMoneyLock((lock) => dispatch(lock, "payout", terms, undefined, undefined, input.expectedPolicy, key,
-      { allowDuplicateHeld: input.allowDuplicateHeld === true }));
+    await withMoneyLock((lock) => dispatch(lock, "payout", terms, { expectedPolicy: input.expectedPolicy, requestKey: key,
+      payout: { allowDuplicateHeld: input.allowDuplicateHeld === true } }));
   } catch (error) {
     // Recorded: the journal holds the outcome (a refusal, or none proven). Not recorded: nothing reached the send site,
     // and a refusal made before recording keeps its code, so the same requestId can be asked again.

@@ -74,10 +74,7 @@ existing domain calls. Submission remains centralized in dispatch.
   make (`allowlist.ts`), and, for members, proposal decoding for "What am I voting on?" (`proposals.ts`, `sign-requests.ts`).
   App access (`app-access.ts`, `app-routes.ts`) serves `/apps/v1` to app servers; `app-confirm.ts` holds the NEP-366
   owner actions apps prepare and serves the confirm page's two calls.
-- **Web** (`web/src/`): one app for both areas, plus the standalone confirm page (`confirm.tsx`, its own build entry). `format.ts` `kindOf` uses the configured area, with a policy-based fallback for legacy instances; `beats.ts` holds each area's briefs, requirements and stages; `showcase.tsx` shows
-  them. `timeline-payment.tsx` follows one held payment step by step, each step read from its own record; it shows data
-  only on the instance that holds those records (approvals filed there). The autopilot run view is no longer here: its
-  route (`/follow/run`) redirects to the agent's app.
+- **Web** (`web/src/`): the standalone confirm and stop page (`confirm.tsx`, the one build entry) and nothing else.
 - **Packages**: a release candidate builds one from the tested snapshot (`test/build-context.test.ts` declares it; the
   prototype's `dao` package retired with its hosts on 2026-11-08). `platform` (`scripts/package-platform.mjs`) is the
   engine for apps: the
@@ -276,13 +273,10 @@ grants, agreements, payments, strategy, runs and Activity) belong to the consumi
 
 The owner dashboard (public entry, sign-in, agent launcher, setup, agent-access consent, walkthroughs, the Payables
 rehearsal and the evidence view) and its browser suites were removed in 0.6.0; [the prototype record](prototype.md)
-describes what it did. Modules it used for session and query handling and for payment display remain under
-`web/src/app`, `web/src/features` and `web/src/shared`, built into no entry and kept with their offline unit tests:
-`payment-records.ts` joins retained local transfers, provider history, held observations and owner records, and a
-failed or incomplete provider history read cannot hide a transfer already present in local activity
-(`test/payment-records.test.ts`, `test/payment-queue.test.ts`, `test/frontend-boundaries.test.ts` with the payment
-stages); `owner-observation.ts` follows a prepared owner action by its correlation ID (`test/owner-observation.test.ts`).
-They are neither durable evidence nor authorization.
+describes what it did. The modules it used for session and query handling and for payment display, kept at first
+with their offline unit tests, are removed too: that logic and its tests belong to the consuming apps. The page's
+build-time libraries are development dependencies, so the platform image, which ships the page prebuilt, installs
+none of them.
 
 The invoice listener serves the page and its browser module from the same origin. The browser module owns drafts,
 refresh ordering and DOM updates; TypeScript checks its JSDoc types during `pnpm typecheck`. Sign-out and an explicit

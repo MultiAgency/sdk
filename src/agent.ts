@@ -122,6 +122,21 @@ export type Sending = { planned: { plan: Plan; leg: PlannedAction } | null; auto
   onSubmitted?: (method: Exclude<Action["method"], "withdraw" | "x402" | "limit_order">, correlationId: string) => void };
 
 /**
+ * What a dispatch carries beyond its action, each named so none is mistaken for another.
+ * `sending`: a strategy send's plan leg, autopilot flag and clock.
+ * `preparedKey`: a prepared invoice's operation, sent on its recorded identity.
+ * `expectedPolicy`: the policy the owner reviewed; a different one now refuses.
+ * `requestKey`: the operation's identity derived from a caller's request (payout-requests.ts), instead of a new one.
+ * `payout`: a payout request's opt-out from the duplicate-held check.
+ * `market`: the hire a market send is for (src/market/hire.ts). A payment's outcome is never awaited here: it is the
+ * chain's, recorded by reconciliation (src/recover.ts).
+ */
+type Dispatching = { sending?: Sending; preparedKey?: string; expectedPolicy?: ReviewedPolicy; requestKey?: string;
+  payout?: { allowDuplicateHeld?: boolean }; market?: MarketSend };
+/** The signed Treasury proposal a limit order is placed for. */
+type OrderDispatching = { order: { proposalId: string } };
+
+/**
  * Sends one money action under the money lock and follows it to a stable status. The request is
  * logged with its key, the mandate digest it runs under and its USD value before sending; the
  * correlation id as soon as the API answers; then the outcome. Every action passes `authorize` after
@@ -129,19 +144,15 @@ export type Sending = { planned: { plan: Plan; leg: PlannedAction } | null; auto
  * attempt. Anything else unanswered stays unresolved, and blocks new money actions until
  * status-only reconciliation proves its outcome.
  */
-/**
- * `requestKey`: the operation's identity derived from a caller's request (payout-requests.ts), instead of a new one.
- * `market`: the hire a market send is for (src/market/hire.ts). A payment's outcome is never awaited here: it is the
- * chain's, recorded by reconciliation (src/recover.ts).
- */
-export function dispatch(lock: MoneyLock, kind: string, action: X402Action, sending: undefined, preparedKey: undefined, expectedPolicy: ReviewedPolicy | undefined, requestKey: string | undefined, payout: undefined, market: MarketSend): Promise<X402Sent>;
-export function dispatch(lock: MoneyLock, kind: string, action: ProviderAction, sending?: Sending, preparedKey?: string, expectedPolicy?: ReviewedPolicy, requestKey?: string, payout?: { allowDuplicateHeld?: boolean }, market?: MarketSend): Promise<StatusResponse>;
-export function dispatch(lock: MoneyLock, kind: "limit-order", action: LimitOrderAction, sending: undefined, preparedKey: undefined,
-  expectedPolicy: ReviewedPolicy | undefined, requestKey: undefined, payout: undefined, market: undefined,
-  order: { proposalId: string }): Promise<StatusResponse>;
+export function dispatch(lock: MoneyLock, kind: string, action: X402Action, options: Pick<Dispatching, "expectedPolicy" | "requestKey"> & { market: MarketSend }): Promise<X402Sent>;
+export function dispatch(lock: MoneyLock, kind: string, action: ProviderAction, options?: Dispatching): Promise<StatusResponse>;
+export function dispatch(lock: MoneyLock, kind: "limit-order", action: LimitOrderAction, options: Pick<Dispatching, "expectedPolicy"> & OrderDispatching): Promise<StatusResponse>;
 export function dispatch(lock: MoneyLock, kind: "limit-order-cancel", action: CancelOrderAction): Promise<OrderProviderView>;
-export async function dispatch(lock: MoneyLock, kind: string, action: Action | CancelOrderAction, sending?: Sending, preparedKey?: string, expectedPolicy?: ReviewedPolicy,
-  requestKey?: string, payout?: { allowDuplicateHeld?: boolean }, market?: MarketSend, order?: { proposalId: string }): Promise<StatusResponse | X402Sent | OrderProviderView> {
+export async function dispatch(lock: MoneyLock, kind: string, action: Action | CancelOrderAction,
+  options: Dispatching & Partial<OrderDispatching> = {}): Promise<StatusResponse | X402Sent | OrderProviderView> {
+  // Read once, before anything is awaited: a caller cannot alter what is sent by changing its options meanwhile.
+  const { sending, preparedKey, requestKey, payout, order } = options;
+  let { expectedPolicy, market } = options;
   assertCanSendAfterRelease();
   action = structuredClone(action);
   expectedPolicy = expectedPolicy && { ...expectedPolicy };
@@ -566,7 +577,7 @@ export async function pay(request: { asset: string; amount: string; recipient: s
   request = structuredClone(request);
   expectedPolicy = expectedPolicy && { ...expectedPolicy };
   try {
-    const settled = await withMoneyLock((lock) => dispatch(lock, "payout", { method: "transfer", request }, undefined, undefined, expectedPolicy));
+    const settled = await withMoneyLock((lock) => dispatch(lock, "payout", { method: "transfer", request }, { expectedPolicy }));
     return {
       outcome: "settled" as const,
       status: settled.status,

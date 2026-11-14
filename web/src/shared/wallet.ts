@@ -3,19 +3,9 @@ import { type DataStorage, NearConnector } from "@fastnear/near-connect";
 import { useSyncExternalStore } from "react";
 
 type WalletState = { status: "idle" | "connecting" | "connected"; accountId?: string; publicKey?: string };
-export type Transaction = {
-  receiverId: string;
-  actions: (
-    | { type: "FunctionCall"; params: { methodName: string; args: object; gas: string; deposit: string } }
-    | { type: "Transfer"; params: { deposit: string } }
-  )[];
-};
 
-/**
- * One wallet connection as an external store: its account, connect and disconnect, and sending
- * a transaction as that account.
- */
-function walletSession(createConnector: () => NearConnector, walletId?: string) {
+/** One wallet connection as an external store: its account, connect and disconnect. */
+function walletSession(createConnector: () => NearConnector) {
   let instance: NearConnector | undefined;
   const connector = () => {
     if (!instance) {
@@ -43,7 +33,6 @@ function walletSession(createConnector: () => NearConnector, walletId?: string) 
 
   return {
     get connector() { return connector(); },
-    update,
     use: () =>
       useSyncExternalStore(
         (listener) => {
@@ -56,7 +45,7 @@ function walletSession(createConnector: () => NearConnector, walletId?: string) 
     async connect() {
       update({ status: "connecting" });
       try {
-        await connector().connect(walletId ? { walletId } : undefined);
+        await connector().connect();
       } finally {
         await sync();
       }
@@ -64,13 +53,6 @@ function walletSession(createConnector: () => NearConnector, walletId?: string) 
     async disconnect() {
       await connector().disconnect();
       update({ status: "idle" });
-    },
-    /** Sends `transaction` as the connected account. Through Trezu that files it as a DAO proposal. */
-    async send(transaction: Transaction) {
-      const { wallet, accounts } = await connector().getConnectedWallet();
-      const signerId = accounts[0]?.accountId;
-      if (!signerId) throw new Error("Connect a wallet first");
-      return wallet.signAndSendTransaction({ signerId, ...transaction });
     },
   };
 }
@@ -98,35 +80,7 @@ const namespaced = (prefix: string): DataStorage => ({
   remove: async (key) => localStorage.removeItem(`${prefix}:${key}`),
 });
 
-/**
- * A DAO acting through Trezu, a second connection beside the owner's: it signs as the DAO by
- * filing each transaction as a proposal its members vote on.
- */
-export const dao = walletSession(
-  () => new NearConnector({
-    network: "mainnet",
-    manifest: HOT_WALLETS,
-    storage: namespaced("dao"),
-  }),
-  "trezu-wallet",
-);
-
 export const useWallet = owner.use;
-
-/** A member signing in to the hosted dashboard: a NEP-413 signature is all it needs. */
-const member = walletSession(() => new NearConnector({ network: "mainnet", features: { signMessage: true }, storage: namespaced("member") }));
-
-/** Signs the gateway's sign-in challenge with the member's wallet, connecting first. */
-export async function signChallenge({ message, recipient, nonce }: { message: string; recipient: string; nonce: string }) {
-  if ((await member.connector.getConnectedWallet().catch(() => null))?.accounts.length !== 1) await member.connect();
-  const { wallet } = await member.connector.getConnectedWallet();
-  const signed = await wallet.signMessage({ message, recipient, nonce: fromBase64(nonce) });
-  // Some wallets also sign the page that asked as a callback URL, without saying so: offer the candidates.
-  const callbackUrls = [...new Set([`${location.origin}/`, location.href])];
-  return { accountId: signed.accountId, publicKey: signed.publicKey, signature: signed.signature, nonce, callbackUrls };
-}
-
-export const signOutMember = () => member.disconnect();
 
 /**
  * A wallet owner's own stop (the confirm build's stop page): one NEP-413 signature is all it needs, so every wallet
@@ -158,34 +112,9 @@ export async function switchStopWallet() {
   await stopper.connect();
 }
 
-/** Sends a transaction from the signed-in member's own wallet, such as a DAO proposal they file. */
-export const sendAsMember = (transaction: Transaction) => member.send(transaction);
 export const connect = () => owner.connect();
-export const disconnect = () => owner.disconnect();
-export const send = (transaction: Transaction) => owner.send(transaction);
 
 const fromBase64 = (value: string) => Uint8Array.from(atob(value), (c) => c.charCodeAt(0));
-
-/**
- * The connected account as an agent owner. Some wallets report the key only with a signature,
- * so a missing key is read from a one-off signed message.
- */
-export async function ownerWallet() {
-  const { wallet, accounts } = await owner.connector.getConnectedWallet();
-  const [account] = accounts;
-  if (!account) throw new Error("Connect a wallet first");
-  const publicKey =
-    account.publicKey ??
-    (
-      await wallet.signMessage({
-        message: "Identify my key as the owner of an Agentic Treasury agent",
-        recipient: location.host,
-        nonce: crypto.getRandomValues(new Uint8Array(32)),
-      })
-    ).publicKey;
-  owner.update({ status: "connected", accountId: account.accountId, publicKey });
-  return { type: "near" as const, account_id: account.accountId, public_key: publicKey };
-}
 
 /** Signs an owner intent's payload exactly as the API generated it, by the standard it chose. */
 export async function signIntent(intent: Intent): Promise<Record<string, unknown>> {

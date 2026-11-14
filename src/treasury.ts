@@ -144,11 +144,11 @@ export async function executeLeg(lock: MoneyLock, leg: Leg, minAmountOut: string
   let shielded: StatusResponse | undefined;
   if (shortfall > 0n) {
     const request = { asset: leg.from.asset, amount: shortfall.toString() };
-    shielded = await dispatch(lock, "shield", { method: "shield", request }, sending);
+    shielded = await dispatch(lock, "shield", { method: "shield", request }, { sending });
     if (shielded.status !== "SUCCESS") return { shortfall, shielded };
   }
   const request = { ...swapRequest(leg), min_amount_out: minAmountOut };
-  try { return { shortfall, shielded, swapped: await dispatch(lock, kind, { method: "swap", request }, sending) }; }
+  try { return { shortfall, shielded, swapped: await dispatch(lock, kind, { method: "swap", request }, { sending }) }; }
   catch (error) {
     const code = shielded ? sendRefusal(error) : undefined;
     if (code === undefined) throw error;
@@ -181,7 +181,7 @@ async function* sweepRun(lock: MoneyLock | undefined, sending: Sending | undefin
   if (!lock) return;
 
   for (const h of exposed) {
-    const settled = await dispatch(lock, "sweep", { method: "shield", request: { asset: h.asset, amount: h.public.toString() } }, sending);
+    const settled = await dispatch(lock, "sweep", { method: "shield", request: { asset: h.asset, amount: h.public.toString() } }, { sending });
     yield {
       type: "shield",
       asset: h.asset,

@@ -248,9 +248,8 @@ export async function placeLimitOrder(context: CallContext, input: unknown) {
     throw refused("signature_invalid", "The stored owner approval does not match this order.");
   try {
     await withMoneyLock(async lock => {
-      await dispatch(lock, "limit-order", { method: "limit_order", request: loaded.record.order }, undefined, undefined,
-        undefined, undefined, undefined, undefined,
-        { proposalId: id });
+      await dispatch(lock, "limit-order", { method: "limit_order", request: loaded.record.order },
+        { order: { proposalId: id } });
       if (readOrderPlacement(id)) try { await refreshTrackedOrder(id); } catch { /* The funded order remains tracked for status-only recovery. */ }
     });
   } catch (error) {

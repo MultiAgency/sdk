@@ -86,7 +86,7 @@ export async function* executePlan(id: string, now = () => new Date(), { autopil
       if (problems.length) { yield { type: "rejected", problems }; return; }
       if (action.type === "shield") {
         const request = { asset: action.asset, amount: action.amount };
-        const settled = await dispatch(lock, plan.source, { method: "shield", request }, sending(action));
+        const settled = await dispatch(lock, plan.source, { method: "shield", request }, { sending: sending(action) });
         yield { type: "action", index, action, status: settled.status, correlationId: settled.correlation_id, failureCode: settled.failure_code };
         if (settled.status !== "SUCCESS") return;
         continue;

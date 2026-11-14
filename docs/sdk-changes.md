@@ -55,8 +55,17 @@ removed or narrowed, so an app server on `appClient` moves from 0.5.9 without co
 Platform only:
 
 - **The retired owner dashboard is no longer built.** The web build has one entry, the confirm and stop page; the
-  dashboard's pages and their browser suites are deleted. The owner-session routes it called
-  (`/gw/*`, `/a/<agent>/rpc/*`) still answer for apps that hold a session.
+  dashboard's pages and their browser suites are deleted, and so are the session, query and payment-display modules
+  it used, with their unit tests: `web/src` holds the page alone, and that logic belongs to the consuming apps. The
+  owner-session routes it called (`/gw/*`, `/a/<agent>/rpc/*`) still answer for apps that hold a session.
+- **The platform image installs only what the engine runs.** The confirm page ships prebuilt, so its build-time
+  libraries (React, Radix, the fonts, near-connect) and the crash test's `openai` client are development dependencies
+  now; `@tanstack/react-query` and `@phosphor-icons/react` are dropped. A production install is ten packages. Checked by
+  building the image from the package and booting it offline (`pnpm check:platform-image`); not deployed.
+- **`dispatch` takes its optional inputs as one named object** (`sending`, `preparedKey`, `expectedPolicy`,
+  `requestKey`, `payout`, `market`, and `order` for a limit order) in place of up to seven positional arguments, so an
+  invoice's prepared key and a request's key can't be passed in each other's place. Its types still refuse the same
+  combinations; every check and its order is unchanged. Offline-tested.
 - **Owner-signed Market funding allocation** ([market allocation](market-allocation.md)): an operator command records a
   wallet owner's NEP-413 permission to use a fully proven funding-only observation for one exact hire, as a
   `market-allocation` journal line (`journalVersion: 4`). It sends nothing; the hire still goes through dispatch,

@@ -68,8 +68,8 @@ for (const fault of faults) test(`x402 signing followed by ${fault.name} never c
   });
   const callsBefore = sim.calls.filter(c => c.payment !== null).length;
   try {
-    await assert.rejects(dispatch(lock, "market-hire", action, undefined, undefined, undefined, bindingKey, undefined,
-      { hire: quote.terms, bindingKey }));
+    await assert.rejects(dispatch(lock, "market-hire", action,
+      { requestKey: bindingKey, market: { hire: quote.terms, bindingKey } }));
     assert.equal(signedCount, 1, "the fault is injected only after the real signer completed");
     assert.equal(sim.calls.filter(c => c.payment !== null).length, callsBefore, "the signed header must never be sent");
     assert.equal(sim.chain.accounts.get(account)!.transfers.length, 0);
