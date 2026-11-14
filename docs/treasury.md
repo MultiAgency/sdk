@@ -200,3 +200,9 @@ against its ceiling; shields are excluded and refunds do not replenish the limit
 refuses. The journal supplies these existing records, so no counter migration is needed. This is
 offline-tested in `test/planning-valuation.test.ts`; it does not establish settlement-time cost or
 provider budget accounting. See [execution valuation](enforcement.md#how-each-claim-is-known).
+
+Autopilot authority refusal (0.6.0 candidate): when this executor has no live grant, a tick records
+`grant_missing` before sweep or quote planning. A live grant that does not approve the strategy
+still permits the existing plan-for-owner behavior; dispatch authorization remains unchanged.
+Offline regression covers absent, revoked and expired grants, zero provider quote/submission calls,
+unchanged balances and unchanged operations (`test/autopilot.test.ts`). Not mainnet-observed.

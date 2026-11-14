@@ -522,3 +522,24 @@ test("a held invoice whose status read answers for another operation stops the t
   assert.deepEqual(sends, []);
   assert.ok(readOps().some(op => op.idempotencyKey === held.operation.idempotencyKey && blocksDispatch(op)));
 });
+
+for (const state of ["missing", "revoked", "expired"] as const) test(`${state} authority records a refusal before quotes or submissions`, async () => {
+  limit(100);
+  book[ASSETS.USDC]!.public = 10n;
+  const before = structuredClone(book);
+  const operations = readOps();
+  const grant = fixtureGrant(grantLabel());
+  mock.method(api, "listGrants", async () => state === "missing" ? [] : [{ ...grant,
+    ...(state === "revoked" ? { revoked_at: new Date().toISOString() } : { expires_at: new Date(0).toISOString() }) }]);
+  let calls = 0;
+  mock.method(api, "forGrant", () => { calls++; throw new Error("No authority: must not quote or submit"); });
+  const report = await tick("schedule");
+  assert.match(report, /Refused: no live grant/);
+  assert.equal(calls, 0);
+  assert.deepEqual(sends, []);
+  assert.deepEqual(book, before);
+  assert.deepEqual(readOps(), operations);
+  const end = ticks().ticks[0]!.end!;
+  assert.equal(end.refusal, "grant_missing");
+  assert.deepEqual([end.plan, end.steps, end.shields], [null, [], []]);
+});
